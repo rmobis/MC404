@@ -1,0 +1,44 @@
+######
+### Instructions
+######
+
+# m = x * g
+000 LOAD MQ, M(0x105)   # MQ = x
+    MUL M(0x200)        # MQ = MQ * g = MQ * 10
+001 LOAD MQ             # AC = MQ
+    STOR M(0x203)       # m  = AC
+
+# k = m / 2
+002 RSH                 # AC = AC / 2
+    STOR M(0x204)       # k  = AC
+
+
+
+# k = (k + (m/k)) / 2
+003 LOAD M(0x203)       # AC = m
+    DIV M(0x204)        # MQ = AC / k
+004 LOAD MQ             # AC = MQ
+    ADD M(0x204)        # AC = AC + k
+005 RSH                 # AC = AC / 2
+    STOR M(0x204)       # k = AC
+
+# i--
+006 LOAD M(0x202)       # AC = i
+    SUB M(0x201)        # AC = AC - o = AC - 1
+007 STOR M(0x202)       # i  = AC
+
+    JUMP+ M(0x003,0:19) # if (i >= 0) stay on loop
+
+
+# "output" k
+008 LOAD M(0x204)       # AC  = k
+
+######
+### Variable initialization
+######
+
+# 105 000000000A # x = 10
+200 000000000A # g = 10
+201 0000000001 # o = 1
+202 0000000000 # i = 9
+

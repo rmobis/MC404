@@ -1,0 +1,58 @@
+######
+### Variable Initialization
+######
+
+105 000000000A # x = 10
+200 000000000A # g = 10
+201 0000000001 # o = 1
+202 0000000009 # i = 9
+
+######
+### Instructions
+######
+
+## m = x * g
+# MQ = x           | MQ = MQ * g = MQ * 10
+# LOAD MQ,M(0x105) | MUL M(0x200)
+000 09 105 0B 200
+# AC = MQ          | m = AC
+# LOAD MQ          | STOR M(0x203)
+001 0A 000 21 203
+
+## v = m / 2
+# AC = AC / 2      | v = AC
+# RSH              | STOR M(0x204)
+002 15 000 21 204
+
+###
+## LOOP 10x
+###
+
+## v = (v + (m/k)) / 2
+# AC = m           | MQ = AC / v
+# LOAD M(0x203)    | DIV M(0x204)
+003 01 203 0C 204
+# AC = MQ          | AC = AC + v
+# LOAD MQ          | ADD M(0x204)
+004 0A 000 05 204
+# AC = AC / 2      | v = AC
+# RSH              | STOR M(0x204)
+005 15 000 21 204
+
+## i-- & loop check
+# AC = i           | AC = AC - o = AC - 1
+# LOAD M(0x202)    | SUB M(0x201)
+006 01 202 06 201
+# i  = AC          | if (i >= 0) stay on loop
+# STOR M(0x202)    | JUMP+ M(0x003,0:19)
+007 21 202 0F 003
+
+###
+## ENDLOOP
+###
+
+## 'Output' v & exit
+# AC = v        | exit
+# LOAD M(0x204) | JUMP M(0x400,00:19)
+008 01 204 0D 400
+

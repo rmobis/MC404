@@ -1,0 +1,64 @@
+######
+### Variable initialization
+######
+
+030 0000000000 # s = 0
+031 0000000001 # cte 1
+032 0000000000 # i = 0
+
+######
+### Instructions
+######
+
+# AC = len(v1)                   | AC = AC - 1
+# LOAD M(3FF)                    | SUB M(031)
+000 01 3FF 06 031
+
+# Mem[3FF] = AC                  | AC = i
+# STOR M(3FF)                    | LOAD M(032)
+001 21 3FF 01 032
+
+#                                | .loopStart:
+#                                | .loadArray1:
+# Jump to .replaceOperands       | MQ = v1[i]
+# JUMP M(.replaceOperands)       | LOAD MQ, M(000)
+002 0E 006 09 000
+
+# .mulArray2:
+# AC:MQ = MQ * v2[i]             | AC = MQ
+# MUL M(000)                     | LOAD MQ
+003 0B 000 0A 000
+
+# AC = AC + s                    | s = AC
+# ADD M(030)                     | STOR M(030)
+004 05 030 21 030
+
+# AC = i                         | AC = AC + 1
+# LOAD M(032)                    | ADD M(031)
+005 01 032 05 031
+
+#                                | .replaceOperands:
+# i = AC                         | AC = AC + &(v1[0])
+# STOR M(032)                    | ADD M(3FD)
+006 21 032 05 3FD
+
+# OP[.loadArray1] = AC(28:39)    | AC = i
+# STOR M(.loadArray1)            | LOAD M(032)
+007 13 002 01 032
+
+# AC = AC + &(v2[0])             | OP[.mulArray1] = AC(28:39)
+# ADD M(3FE)                     | STOR M(.mulArray2)
+008 05 3FE 12 003
+
+# AC = len(v1) - 1               | AC = AC - i
+# LOAD M(3FF)                    | SUB M(032)
+009 01 3FF 06 032
+
+#                                | .loopEnd:
+# if (i <= len(v1)) stay on loop | AC = s
+# JUMP+ M(.loopStart)            | LOAD M(030)
+00A 10 002 01 030
+
+# exit
+# JUMP M(400, 00:19)
+00B 0D 400 00 000
